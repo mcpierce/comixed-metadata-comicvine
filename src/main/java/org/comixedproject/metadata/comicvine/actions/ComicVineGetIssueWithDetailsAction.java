@@ -75,7 +75,7 @@ public class ComicVineGetIssueWithDetailsAction
     try {
       result = request.block();
     } catch (Exception error) {
-      throw new MetadataException("failed to get issue details", error);
+      throw new MetadataException("failed to get story details", error);
     }
 
     if (result == null) throw new MetadataException("No response received");

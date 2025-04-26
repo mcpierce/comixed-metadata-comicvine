@@ -28,13 +28,8 @@ import lombok.extern.log4j.Log4j2;
 import org.comixedproject.metadata.MetadataException;
 import org.comixedproject.metadata.adaptors.AbstractMetadataAdaptor;
 import org.comixedproject.metadata.adaptors.MetadataAdaptor;
-import org.comixedproject.metadata.comicvine.actions.ComicVineGetAllIssuesAction;
-import org.comixedproject.metadata.comicvine.actions.ComicVineGetIssueAction;
-import org.comixedproject.metadata.comicvine.actions.ComicVineGetIssueDetailsAction;
-import org.comixedproject.metadata.comicvine.actions.ComicVineGetVolumesAction;
-import org.comixedproject.metadata.model.IssueDetailsMetadata;
-import org.comixedproject.metadata.model.IssueMetadata;
-import org.comixedproject.metadata.model.VolumeMetadata;
+import org.comixedproject.metadata.comicvine.actions.*;
+import org.comixedproject.metadata.model.*;
 import org.comixedproject.model.metadata.MetadataSource;
 
 /**
@@ -55,6 +50,44 @@ public class ComicVineMetadataAdaptor extends AbstractMetadataAdaptor {
 
   public ComicVineMetadataAdaptor() {
     super("ComiXed ComicVine Scraper", PROVIDER_NAME);
+  }
+
+  @Override
+  public List<StoryMetadata> getStories(
+      final String storyName, final Integer maxRecords, final MetadataSource metadataSource)
+      throws MetadataException {
+    log.debug("Fetching stories from ComicVine: storyName={}", storyName);
+    final ComicVineGetStoriesAction action = new ComicVineGetStoriesAction();
+    action.setBaseUrl(BASE_URL);
+    action.setApiKey(
+        this.getSourcePropertyByName(metadataSource.getProperties(), PROPERTY_API_KEY, true));
+    action.setDelay(this.doGetDelayValue(metadataSource));
+    action.setStoryName(storyName);
+    action.setMaxRecords(maxRecords);
+
+    log.debug("Executing action");
+    final List<StoryMetadata> result = action.execute();
+
+    log.debug("Returning {} stories", result.size());
+    return result;
+  }
+
+  @Override
+  public StoryDetailMetadata getStory(final String referenceId, final MetadataSource metadataSource)
+      throws MetadataException {
+    log.debug("Fetching story details: referenceId={}", referenceId);
+    final ComicVineGetStoryDetailAction action = new ComicVineGetStoryDetailAction();
+    action.setBaseUrl(BASE_URL);
+    action.setApiKey(
+        this.getSourcePropertyByName(metadataSource.getProperties(), PROPERTY_API_KEY, true));
+    action.setDelay(this.doGetDelayValue(metadataSource));
+    action.setReferenceId(referenceId);
+
+    log.debug("Executing action");
+    final StoryDetailMetadata result = action.execute();
+
+    log.debug("Returning one story with {} issues", result.getIssues().size());
+    return result;
   }
 
   @Override
